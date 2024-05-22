@@ -337,75 +337,75 @@ class FrmAdmin(QMainWindow):
         self.ui.btn_salvar.clicked.connect(self.Futuro)
         self.ui.btn_salvar.clicked.connect(self.Sair)
 
-def Voltar(self):
-    global window
+    def Voltar(self):
+        global window
 
-    window.close()
-    window = FrmLogin()
-    window.show()
+        window.close()
+        window = FrmLogin()
+        window.show()
 
 
-def HoraData(self):
-    tempoAtual = QTime.currentTime()
-    tempoTexto = tempoAtual.toString('hh:mm:ss')
-    data_atual = datetime.date.today()
-    dataTexto = data_atual.srtftime('%d/%m/%Y')
+    def HoraData(self):
+        tempoAtual = QTime.currentTime()
+        tempoTexto = tempoAtual.toString('hh:mm:ss')
+        data_atual = datetime.date.today()
+        dataTexto = data_atual.srtftime('%d/%m/%Y')
 
-    self.ui.lbl_hora_data_funcionarios.setText(f'{dataTexto} {tempoTexto}')
-    self.ui.lbl_hora_data_alterar_funcionarios.setText(f'{dataTexto} {tempoTexto}')
+        self.ui.lbl_hora_data_funcionarios.setText(f'{dataTexto} {tempoTexto}')
+        self.ui.lbl_hora_data_alterar_funcionarios.setText(f'{dataTexto} {tempoTexto}')
 
-    self.ui.lbl_hora_data_monitoramento.setText(f'{dataTexto} {tempoTexto}')
+        self.ui.lbl_hora_data_monitoramento.setText(f'{dataTexto} {tempoTexto}')
 
-    self.ui.lbl_hora_data.setText(f'{dataTexto} {tempoTexto}')
+        self.ui.lbl_hora_data.setText(f'{dataTexto} {tempoTexto}')
 
-    self.ui.lbl_hora_data_produtos.setText(f'{dataTexto} {tempoTexto}')
-    self.ui.lbl_hora_data_alterar_produto.setText(f'{dataTexto} {tempoTexto}')
-    self.ui.lbl_hora_data_cadastrar_produto.setText(f'{dataTexto} {tempoTexto}')
+        self.ui.lbl_hora_data_produtos.setText(f'{dataTexto} {tempoTexto}')
+        self.ui.lbl_hora_data_alterar_produto.setText(f'{dataTexto} {tempoTexto}')
+        self.ui.lbl_hora_data_cadastrar_produto.setText(f'{dataTexto} {tempoTexto}')
 
-    self.ui.lbl_hora_data_fornecedores.setText(f'{dataTexto} {tempoTexto}')
-    self.ui.lbl_hora_data_alterar_fornecedores.setText(f'{dataTexto} {tempoTexto}')
-    self.ui.lbl_hora_data_cadastrar_fornecedores.setText(f'{dataTexto} {tempoTexto}')
+        self.ui.lbl_hora_data_fornecedores.setText(f'{dataTexto} {tempoTexto}')
+        self.ui.lbl_hora_data_alterar_fornecedores.setText(f'{dataTexto} {tempoTexto}')
+        self.ui.lbl_hora_data_cadastrar_fornecedores.setText(f'{dataTexto} {tempoTexto}')
 
-    self.ui.lbl_hora_data_clientes.setText(f'{dataTexto} {tempoTexto}')
-    self.ui.lbl_hora_data_cadastrar_clientes.setText(f'{dataTexto} {tempoTexto}')
-    self.ui.lbl_hora_data_alterar_clientes.setText(f'{dataTexto} {tempoTexto}')
+        self.ui.lbl_hora_data_clientes.setText(f'{dataTexto} {tempoTexto}')
+        self.ui.lbl_hora_data_cadastrar_clientes.setText(f'{dataTexto} {tempoTexto}')
+        self.ui.lbl_hora_data_alterar_clientes.setText(f'{dataTexto} {tempoTexto}')
 
-def PesquisandoProdutosPeloCodigo(self):
-    produtos = list()
+    def PesquisandoProdutosPeloCodigo(self):
+        produtos = list()
 
-    cod_inserido = self.ui.line_codigo_produto
+        cod_inserido = self.ui.line_codigo_produto
 
-    cursor.execute('SELECT * FROM produtos')
-    banco_produtos = cursor.fetchall()
-
-    produtos.clear()
-    tabela = self.ui.tabela_produto
-
-    for produto in banco_produtos:
-        produtos.append(produto[0])
-
-    items = tabela.findItems(cod_inserido.text(), Qt.MatchExactly)
-
-    if items:
-        item = items [0]
-        tabela.SetCurrentItem(item)
-
-        cod_inserido.setStyleSheet(StyleNormal)
-
-    else:
-        cod_inserido.setStyleSheet(StyleError)
-
-def codProdutoVendas(self):
         cursor.execute('SELECT * FROM produtos')
         banco_produtos = cursor.fetchall()
 
-        produto_inserido = self.ui.line_search_bar_vendas
+        produtos.clear()
+        tabela = self.ui.tabela_produto
 
-        for pos, produto in enumerate(banco_produtos):
-            if produto[1] == produto_inserido.text():
-                self.ui.line_codigo_vendas.setText(produto[0])
-                break
-   def ConfirmarCliente(self):
+        for produto in banco_produtos:
+            produtos.append(produto[0])
+
+        items = tabela.findItems(cod_inserido.text(), Qt.MatchExactly)
+
+        if items:
+            item = items [0]
+            tabela.SetCurrentItem(item)
+
+            cod_inserido.setStyleSheet(StyleNormal)
+
+        else:
+            cod_inserido.setStyleSheet(StyleError)
+
+    def codProdutoVendas(self):
+            cursor.execute('SELECT * FROM produtos')
+            banco_produtos = cursor.fetchall()
+
+            produto_inserido = self.ui.line_search_bar_vendas
+
+            for pos, produto in enumerate(banco_produtos):
+                if produto[1] == produto_inserido.text():
+                    self.ui.line_codigo_vendas.setText(produto[0])
+                    break
+    def ConfirmarCliente(self):
         global search_clientes
 
         cliente = self.ui.line_cliente
@@ -422,230 +422,427 @@ def codProdutoVendas(self):
         else:
             cliente.setStyleSheet(StyleError)
 
-def FinalizarVendas(self):
-    cursor.execute('SELECT * FROM vendas')
-    banco_vendas = cursor.fetchall()
-
-    cursor.execute('SELECT * FROM quem_vendeu_mais')
-    banco_quem_mais_vendeu = cursor.fetchall()
-
-    if len(banco_vendas) > 0:
-        tempoAtual = QTime.currentTime()
-        tempoTexto = tempoAtual.toString('hh:mm:ss')
-        data_atual = datetime.date.today()
-        dataTexto = data_atual.strftime('%d/%m/%Y')
-
-        qtde_vendido = list()
-        totalVenda = list()
-        vendedor = UserLogado
-        clienteInserido = self.ui.line_cliente
-        cliente = ''
-        data_hora = f'{dataTexto} / {tempoTexto}'
-
-        if clienteInserido.text() in search_clientes:
-            cliente = clienteInserido.text()
-        else:
-            cliente = 'Não Informado'
-
-        for venda in banco_vendas:
-            qtde_vendido.append(int(venda[3]))
-            totalVenda.append(int(venda[4]))
-
-        comando_SQL = 'INSERT INTO monitoramento_vendas VALUES (%s,%s,%s,%s,%s)'
-        dados = f'{vendedor}', f'{cliente}', f'{sum(qtde_vendido)}', f'{sum(totalVenda)}', f'{data_hora}'
-        cursor.execute(comando_SQL, dados)
-
-        funcionarios = list()
-        for funcionario in banco_quem_mais_vendeu:
-            funcionarios.append(funcionario[0])
-
-            if funcionario[0] == vendedor:
-                cursor.execute(f'UPDATE quem_vendeu_mais set total_qtde = {int(funcionario[1]) + int(sum(qtde_vendido))} WHERE nome = "{vendedor}"')
-
-            if vendedor not in funcionarios:
-                comando_SQL = 'INSERT INTO quem_vendeu_mais VALUES (%s,%s)'
-                dados = f'{vendedor}', f'{sum(qtde_vendido)}'
-                cursor.execute(comando_SQL, dados)
-
-        cursor.execute('DELETE FROM vendas')
-        self.AtualizaTabelaVendas()
-        self.AtualizaTotal()
-        self.AtualizaTabelaMonitoramentoVendas()
-        self.AtualizaCompleterSearchVendas()
-
-        self.ui.line_codigo_vendas.clear()
-        self.ui.line_cliente.clear()
-        self.ui.line_quantidade_vendas.clear()
-        self.ui.line_desconto_vendas.clear()
-        self.ui.lbl_troco.setText('0,00')
-        self.ui.line_cliente.setStyleSheet(StyleNormal)
-        self.ui.line_search_bar_vendas.clear()
-        self.ui.line_troco.clear()
-        self.ui.line_desconto_vendas.setStyleSheet(StyleNormal)
-        self.ui.line_codigo_vendas.setStyleSheet(StyleNormal)
-        self.ui.line_quantidade_vendas.setStyleSheet(StyleNormal)
-
-def Troco(self):
-    cursor.execute('SELECT * FROM vendas')
-    banco_vendas = cursor.fetchall()
-
-    troco_desejado = self.ui.line_troco.text()
-    if troco_desejado.isnumeric() == True:
-        vendas = list()
-        vendas.clear()
-
-        for venda in banco_vendas:
-            vendas.append(int(venda[4]))
-
-        troco = int(troco_desejado) - sum(vendas)
-        self.ui.lbl_troco.setText(f'{lang.toString(int(troco) * 0.01, "f", 2)}')
-
-def AtualizaTotal(self):
-
+    def FinalizarVendas(self):
         cursor.execute('SELECT * FROM vendas')
         banco_vendas = cursor.fetchall()
 
-        vendas = list()
+        cursor.execute('SELECT * FROM quem_vendeu_mais')
+        banco_quem_mais_vendeu = cursor.fetchall()
 
-        for pos, venda in enumerate(banco_vendas):
-            vendas.append(int(venda[4]))
+        if len(banco_vendas) > 0:
+            tempoAtual = QTime.currentTime()
+            tempoTexto = tempoAtual.toString('hh:mm:ss')
+            data_atual = datetime.date.today()
+            dataTexto = data_atual.strftime('%d/%m/%Y')
 
-        total = lang.toString(sum(vendas) * 0.01, 'f', 2)
-        self.ui.lbl_total_valor.setText(f'{total}')
-        self.Troco()
+            qtde_vendido = list()
+            totalVenda = list()
+            vendedor = UserLogado
+            clienteInserido = self.ui.line_cliente
+            cliente = ''
+            data_hora = f'{dataTexto} / {tempoTexto}'
 
-def Futuro(self):
-    global futuroTexto
-    atual = datetime.datetime.now()
-
-    futuro = atual + datetime.timedelta(minutes=20)
-    futuroTexto = futuro.time().strftime('%H:%M:%S')
-
-def Sair(self):
-    global futuroTexto
-    tempoAtual = QTime.currentTime()
-    tempoTexto = tempoAtual.toString('hh:mm:ss')
-
-    if self.ui.checkBox_finalizar_app.isChecked() == True:
-        if tempoTexto == futuroTexto:
-            sys.exit()
-
-def LimparTabelaMonitoramento(self):
-    cursor.execute('DELETE FROM monitoramento_vendas')
-    cursor.execute('DELETE FROM quem_vendeu_mais')
-    self.AtualizaTabelaMonitoramentoVendas()
-    self.AtualizaCompleterSearchVendas()
-
-    # Popups
-def Popup(self):
-    msg = QMessageBox()
-    msg.setWindowTitle("Erro - Cadastro do Funcionario")
-    msg.setText('Selecione um Nível de Usuário!')
-
-    icon = QIcon()
-    icon.addPixmap(QPixmap("View/Imagens/Logo Ico.ico"), QIcon.Normal, QIcon.Off)
-    msg.setWindowIcon(icon)
-    x = msg.exec_()
-
-def PopupXlsDiretorio(self):
-    msg = QMessageBox()
-    msg.setWindowTitle("Erro - Gerar Excel")
-    msg.setText('Selecione um diretório válido!')
-
-    icon = QIcon()
-    icon.addPixmap(QPixmap("View/Imagens/Logo Ico.ico"), QIcon.Normal, QIcon.Off)
-    msg.setWindowIcon(icon)
-    x = msg.exec_()
-
-def PopupXls(self):
-    msg = QMessageBox()
-    msg.setWindowTitle("Erro - Gerar Excel")
-    msg.setText('Verifique se não há um ARQUIVO com o mesmo nome aberto!')
-
-    icon = QIcon()
-    icon.addPixmap(QPixmap("View/Imagens/Logo Ico.ico"), QIcon.Normal, QIcon.Off)
-    msg.setWindowIcon(icon)
-    x = msg.exec_()
-
-def PoupXlsBancoVazio(self):
-    msg = QMessageBox()
-    msg.setWindowTitle("Erro - Gerar Excel")
-    msg.setText('Nenhuma venda informada!')
-
-    icon = QIcon()
-    icon.addPixmap(QPixmap("View/Imagens/Logo Ico.ico"), QIcon.Normal, QIcon.Off)
-    msg.setWindowIcon(icon)
-    x = msg.exec_()
-
-    # Função que gera um arquivo xlsx para melhor monitoramento das vendas
-def GerarXls(self):
-    global wb
-
-    cursor.execute('SELECT * FROM monitoramento_vendas')
-    banco_monitoramento = cursor.fetchall()
-
-    if len(banco_monitoramento) > 0:
-            Tk().withdraw()
-            diretorio = askdirectory()
-
-            if diretorio != '':
-                try:
-                    wb.save(filename=r'{}\Relatório.xlsx'.format(diretorio))
-                except:
-                    self.PopupXls()
-                else:
-
-                    cursor.execute('SELECT * FROM quem_vendeu_mais')
-                    banco_quem_vendeu_mais = cursor.fetchall()
-
-                    total_vendido = 0
-                    total_faturado = 0
-                    total_clientes_cadastrados = 0
-                    total_clientes_não_cadastrados = 0
-                    quem_vendeu_mais = list()
-                    funcionario = ''
-
-                    planilha = wb['Relatório']
-
-                    c = 18
-                    for vendas in banco_monitoramento:
-                        total_vendido += int(vendas[2])
-                        total_faturado += int(vendas[3])
-                        if vendas[1] == 'Não Informado':
-                            total_clientes_não_cadastrados += 1
-                        else:
-                            total_clientes_cadastrados += 1
-                        c += 1
-                        conv = lang.toString(int(vendas[3]) * 0.01, "f", 2)
-                        planilha[f'A{c}'] = vendas[0]
-                        planilha[f'E{c}'] = vendas[1]
-                        planilha[f'I{c}'] = int(vendas[2])
-                        planilha[f'M{c}'] = 'RS ' + conv
-                        planilha[f'R{c}'] = vendas[4]
-
-                    for funcionarios in banco_quem_vendeu_mais:
-                        quem_vendeu_mais.append(funcionarios[1])
-
-                    for funcionarios in banco_quem_vendeu_mais:
-                        if funcionarios[1] == max(quem_vendeu_mais, key=int):
-                            funcionario = funcionarios[0]
-                    conv = lang.toString(int(total_faturado) * 0.01, "f", 2)
-
-                    planilha['F12'] = total_vendido
-                    planilha['F13'] = 'RS ' + conv
-                    planilha['F14'] = funcionario
-                    planilha['F15'] = total_clientes_cadastrados
-                    planilha['F16'] = total_clientes_não_cadastrados
-
-                    wb.save(filename=r'{}\Relatório.xlsx'.format(diretorio))
-
-                    for c in range(19, 19 + len(banco_monitoramento)):
-                        planilha[f'A{c}'] = None
-                        planilha[f'E{c}'] = None
-                        planilha[f'I{c}'] = None
-                        planilha[f'M{c}'] = None
-                        planilha[f'R{c}'] = None
+            if clienteInserido.text() in search_clientes:
+                cliente = clienteInserido.text()
             else:
-                self.PopupXlsDiretorio()
-    else:
-        self.PoupXlsBancoVazio()
+                cliente = 'Não Informado'
+
+            for venda in banco_vendas:
+                qtde_vendido.append(int(venda[3]))
+                totalVenda.append(int(venda[4]))
+
+            comando_SQL = 'INSERT INTO monitoramento_vendas VALUES (%s,%s,%s,%s,%s)'
+            dados = f'{vendedor}', f'{cliente}', f'{sum(qtde_vendido)}', f'{sum(totalVenda)}', f'{data_hora}'
+            cursor.execute(comando_SQL, dados)
+
+            funcionarios = list()
+            for funcionario in banco_quem_mais_vendeu:
+                funcionarios.append(funcionario[0])
+
+                if funcionario[0] == vendedor:
+                    cursor.execute(f'UPDATE quem_vendeu_mais set total_qtde = {int(funcionario[1]) + int(sum(qtde_vendido))} WHERE nome = "{vendedor}"')
+
+                if vendedor not in funcionarios:
+                    comando_SQL = 'INSERT INTO quem_vendeu_mais VALUES (%s,%s)'
+                    dados = f'{vendedor}', f'{sum(qtde_vendido)}'
+                    cursor.execute(comando_SQL, dados)
+
+            cursor.execute('DELETE FROM vendas')
+            self.AtualizaTabelaVendas()
+            self.AtualizaTotal()
+            self.AtualizaTabelaMonitoramentoVendas()
+            self.AtualizaCompleterSearchVendas()
+
+            self.ui.line_codigo_vendas.clear()
+            self.ui.line_cliente.clear()
+            self.ui.line_quantidade_vendas.clear()
+            self.ui.line_desconto_vendas.clear()
+            self.ui.lbl_troco.setText('0,00')
+            self.ui.line_cliente.setStyleSheet(StyleNormal)
+            self.ui.line_search_bar_vendas.clear()
+            self.ui.line_troco.clear()
+            self.ui.line_desconto_vendas.setStyleSheet(StyleNormal)
+            self.ui.line_codigo_vendas.setStyleSheet(StyleNormal)
+            self.ui.line_quantidade_vendas.setStyleSheet(StyleNormal)
+
+    def Troco(self):
+        cursor.execute('SELECT * FROM vendas')
+        banco_vendas = cursor.fetchall()
+
+        troco_desejado = self.ui.line_troco.text()
+        if troco_desejado.isnumeric() == True:
+            vendas = list()
+            vendas.clear()
+
+            for venda in banco_vendas:
+                vendas.append(int(venda[4]))
+
+            troco = int(troco_desejado) - sum(vendas)
+            self.ui.lbl_troco.setText(f'{lang.toString(int(troco) * 0.01, "f", 2)}')
+
+    def AtualizaTotal(self):
+
+            cursor.execute('SELECT * FROM vendas')
+            banco_vendas = cursor.fetchall()
+
+            vendas = list()
+
+            for pos, venda in enumerate(banco_vendas):
+                vendas.append(int(venda[4]))
+
+            total = lang.toString(sum(vendas) * 0.01, 'f', 2)
+            self.ui.lbl_total_valor.setText(f'{total}')
+            self.Troco()
+
+    def Futuro(self):
+        global futuroTexto
+        atual = datetime.datetime.now()
+
+        futuro = atual + datetime.timedelta(minutes=20)
+        futuroTexto = futuro.time().strftime('%H:%M:%S')
+
+    def Sair(self):
+        global futuroTexto
+        tempoAtual = QTime.currentTime()
+        tempoTexto = tempoAtual.toString('hh:mm:ss')
+
+        if self.ui.checkBox_finalizar_app.isChecked() == True:
+            if tempoTexto == futuroTexto:
+                sys.exit()
+
+    def LimparTabelaMonitoramento(self):
+        cursor.execute('DELETE FROM monitoramento_vendas')
+        cursor.execute('DELETE FROM quem_vendeu_mais')
+        self.AtualizaTabelaMonitoramentoVendas()
+        self.AtualizaCompleterSearchVendas()
+
+        # Popups
+    def Popup(self):
+        msg = QMessageBox()
+        msg.setWindowTitle("Erro - Cadastro do Funcionario")
+        msg.setText('Selecione um Nível de Usuário!')
+
+        icon = QIcon()
+        icon.addPixmap(QPixmap("View/Imagens/Logo Ico.ico"), QIcon.Normal, QIcon.Off)
+        msg.setWindowIcon(icon)
+        x = msg.exec_()
+
+    def PopupXlsDiretorio(self):
+        msg = QMessageBox()
+        msg.setWindowTitle("Erro - Gerar Excel")
+        msg.setText('Selecione um diretório válido!')
+
+        icon = QIcon()
+        icon.addPixmap(QPixmap("View/Imagens/Logo Ico.ico"), QIcon.Normal, QIcon.Off)
+        msg.setWindowIcon(icon)
+        x = msg.exec_()
+
+    def PopupXls(self):
+        msg = QMessageBox()
+        msg.setWindowTitle("Erro - Gerar Excel")
+        msg.setText('Verifique se não há um ARQUIVO com o mesmo nome aberto!')
+
+        icon = QIcon()
+        icon.addPixmap(QPixmap("View/Imagens/Logo Ico.ico"), QIcon.Normal, QIcon.Off)
+        msg.setWindowIcon(icon)
+        x = msg.exec_()
+
+    def PoupXlsBancoVazio(self):
+        msg = QMessageBox()
+        msg.setWindowTitle("Erro - Gerar Excel")
+        msg.setText('Nenhuma venda informada!')
+
+        icon = QIcon()
+        icon.addPixmap(QPixmap("View/Imagens/Logo Ico.ico"), QIcon.Normal, QIcon.Off)
+        msg.setWindowIcon(icon)
+        x = msg.exec_()
+
+        # Função que gera um arquivo xlsx para melhor monitoramento das vendas
+    def GerarXls(self):
+        global wb
+
+        cursor.execute('SELECT * FROM monitoramento_vendas')
+        banco_monitoramento = cursor.fetchall()
+
+        if len(banco_monitoramento) > 0:
+                Tk().withdraw()
+                diretorio = askdirectory()
+
+                if diretorio != '':
+                    try:
+                        wb.save(filename=r'{}\Relatório.xlsx'.format(diretorio))
+                    except:
+                        self.PopupXls()
+                    else:
+
+                        cursor.execute('SELECT * FROM quem_vendeu_mais')
+                        banco_quem_vendeu_mais = cursor.fetchall()
+
+                        total_vendido = 0
+                        total_faturado = 0
+                        total_clientes_cadastrados = 0
+                        total_clientes_não_cadastrados = 0
+                        quem_vendeu_mais = list()
+                        funcionario = ''
+
+                        planilha = wb['Relatório']
+
+                        c = 18
+                        for vendas in banco_monitoramento:
+                            total_vendido += int(vendas[2])
+                            total_faturado += int(vendas[3])
+                            if vendas[1] == 'Não Informado':
+                                total_clientes_não_cadastrados += 1
+                            else:
+                                total_clientes_cadastrados += 1
+                            c += 1
+                            conv = lang.toString(int(vendas[3]) * 0.01, "f", 2)
+                            planilha[f'A{c}'] = vendas[0]
+                            planilha[f'E{c}'] = vendas[1]
+                            planilha[f'I{c}'] = int(vendas[2])
+                            planilha[f'M{c}'] = 'RS ' + conv
+                            planilha[f'R{c}'] = vendas[4]
+
+                        for funcionarios in banco_quem_vendeu_mais:
+                            quem_vendeu_mais.append(funcionarios[1])
+
+                        for funcionarios in banco_quem_vendeu_mais:
+                            if funcionarios[1] == max(quem_vendeu_mais, key=int):
+                                funcionario = funcionarios[0]
+                        conv = lang.toString(int(total_faturado) * 0.01, "f", 2)
+
+                        planilha['F12'] = total_vendido
+                        planilha['F13'] = 'RS ' + conv
+                        planilha['F14'] = funcionario
+                        planilha['F15'] = total_clientes_cadastrados
+                        planilha['F16'] = total_clientes_não_cadastrados
+
+                        wb.save(filename=r'{}\Relatório.xlsx'.format(diretorio))
+
+                        for c in range(19, 19 + len(banco_monitoramento)):
+                            planilha[f'A{c}'] = None
+                            planilha[f'E{c}'] = None
+                            planilha[f'I{c}'] = None
+                            planilha[f'M{c}'] = None
+                            planilha[f'R{c}'] = None
+                else:
+                    self.PopupXlsDiretorio()
+        else:
+            self.PoupXlsBancoVazio()
+
+    def FormataNumeroContrato(self, pg):
+
+        global numero
+
+        if pg == 'CadastrarFornecedores':
+            numero = self.ui.line_cadastrar_contato_fornecedores
+        if pg == 'AlterarFornecedores':
+            numero = self.ui.line_alterar_contato_fornecedor
+        if pg == 'CadastrarClientes':
+            numero = self.ui.line_contato_cadastrar_clientes
+        if pg == 'AlterarClientes':
+            numero = self.ui.line_alterar_contato_cliente
+
+        texto = numero.text()
+        tamanho = len(numero.text())
+
+        if tamanho == 1 and texto.isnumeric() == True:
+            numero.setText(f'({texto}')
+        if tamanho == 3 and texto[1:].isnumeric() == True:
+            numero.setText(f'{texto})')
+        if tamanho == 6 and texto[5].isnumeric() == True:
+            numero.setText(f'{texto}')
+        if tamanho == 11 and texto[7].isnumeric() == True:
+            numero.setText(f'{texto}-')
+
+
+    def FormatarCPFClientes(self, pg):
+
+        if pg =='Cadastrar':
+            CPF = self.ui.line_cpf_cadastrar_clientes
+        if pg == 'Alterar':
+            CPF = self.ui.line_alterar_cpf_cliente
+        if pg == 'Vendas':
+            CPF = self.ui.line_cliente
+
+        TextoInserido = CPF.text()
+        TamanhoDoTexto = len(CPF.text())
+
+        if TamanhoDoTexto == 3 and TextoInserido.isnumeric() == True:
+            CPF.setText(f'{TextoInserido}')
+        if TamanhoDoTexto == 7 and TextoInserido[4:].isnumeric() == True:
+            CPF.setText(f'{TextoInserido}')
+        if TamanhoDoTexto == 11 and TextoInserido[8:].isnumeric() == True:
+            CPF.setText(f'{TextoInserido}-')
+
+    def SearchProdutos(self, pg):
+        tabela = self
+        produto = self
+
+        if pg == 'Produtos':
+            tabela = self.ui.tabela_produto
+            produto = self.ui.line_search_Bar_produtos
+
+        if pg == 'Alterar':
+            tabela = self.ui.tabela_alterar_produto
+            produto = self.ui.line_search_Bar_alterar_produto
+        
+
+        if pg == 'Cadastar':
+            tabela = self.ui.tabela_produto
+            produto = self.ui.line_search_Bar_cadastrar_produto
+
+        items = tabela.findItems(produto.text(), Qt.MatchContains)
+
+        if items:
+            item = items[0]
+            tabela.setCurrentItem(item)
+
+    def SearchFornecedores(self, pg):
+        tabela = self
+        produto = self
+
+        if pg == 'Fornecedores':
+            tabela = self.ui.tabela_fornecedores
+            fornecedores = self.ui.line_search_Bar_fornecedores
+
+        if pg == 'Alterar':
+            tabela = self.ui.tabela_alterar_fornecedores
+            fornecedores = self.ui.line_search_Bar_alerar_fornecedores
+
+        if pg == 'Cadastrar':
+            tabela = self.ui.tabela_cadastrar_fornecedores
+            fornecedores = self.ui.line_search_Bar_cadastrar_fornecedores
+
+        items = tabela.findItems(produto.text(), Qt.MatchContains)
+
+        if items:
+            item = items[0]
+            tabela.setCurrentItem(item)
+
+
+    def SearchFuncionarios(self, pg):
+        tabela = self
+        produto = self
+
+        if pg == 'Funcionarios':
+            tabela = self.ui.tabela_funcionarios
+            fornecedores = self.ui.line_search_Bar_funcionarios
+
+        if pg == 'Alterar':
+            tabela = self.ui.tabela_alterar_funcionarios
+            fornecedores = self.ui.line_search_Bar_alerar_funcionarios
+
+        if pg == 'Cadastrar':
+            tabela = self.ui.tabela_cadastrar_funcionarios
+            fornecedores = self.ui.line_search_Bar_cadastrar_funcionarios
+
+        items = tabela.findItems(produto.text(), Qt.MatchContains)
+
+        if items:
+            item = items[0]
+            tabela.setCurrentItem(item)
+
+    def SearchClientes(self, pg):
+        tabela = self
+        produto = self
+
+        if pg == 'Clientes':
+            tabela = self.ui.tabela_clientes
+            fornecedores = self.ui.line_search_Bar_clientes
+
+        if pg == 'Alterar':
+            tabela = self.ui.tabela_alterar_clientes
+            fornecedores = self.ui.line_search_Bar_alerar_clientes
+
+        if pg == 'Cadastrar':
+            tabela = self.ui.tabela_cadastrar_clientes
+            fornecedores = self.ui.line_search_Bar_cadastrar_clientes
+
+        items = tabela.findItems(produto.text(), Qt.MatchContains)
+
+        if items:
+            item = items[0]
+            tabela.setCurrentItem(item)
+    
+    def SearchMonitoramentoVendas(self):
+        tabela = self.ui.tabela_monitoramento
+        vendas = self.ui.line_search_bar_monitoramento
+
+        items = tabela.findItems(vendas.text(), Qt.MatchContains)
+        if items:
+            item = items[0]
+            tabela.setCurrentItem(item)
+
+    def AtualizaCompleterSearchFornecedores(self):
+        global search_fornecedores
+
+        cursor.execute('SELECT * FROM fornecedores')
+        banco_fornecedores = cursor.fetchall()
+
+        search_fornecedores.clear()
+        search_fornecedores = []
+
+        for fornecedor in banco_fornecedores:
+            search_fornecedores.append(fornecedor[0])
+
+            self.completer = QCompleter(search_fornecedores)
+            self.completer.setCaseSensitivity(Qt.CaseInsensitive)
+            self.ui.line_search_Bar_fornecedores.setCompleter(self.completer)
+            self.ui.line_search_Bar_altarar_fornecedor.setCompleter(self.completer)
+            self.ui.line_search_Bar_cadastrar_fornecedores.setCompleter(self.completer)
+            self.ui.line_fornecedor_cadastrar.setCompleter(self.completer)
+            self.ui.line_fornecedor_alterar_produto.setCompleter(self.completer)
+
+    def AtualizaCompleterSearchVendas(self):
+        global search_monitoramento
+
+        cursor.execute('SELECT * FROM monitoramento_vendas')
+        banco_monitoramento = cursor.fetchall()
+
+        search_monitoramento.clear()
+
+        for venda in banco_monitoramento:
+            if venda[0] not in search_monitoramento:
+                search_monitoramento.append(venda[0])
+
+            if venda[1] not in search_monitoramento:
+                if venda[1] != 'Não informado':
+                    search_monitoramento.append(venda[1])
+                search_monitoramento.append(venda[4])
+
+        self.completer = QCompleter(search_monitoramento)
+        self.completer.setCaseSensitivity(Qt.CaseInsensitive)
+        self.ui.line_search_bar_monitoramento.setCompleter(self.completer)
+
+    def AtualizaCompleterSeatchProdutos(self):
+        global search_produtos
+
+        cursor.execute('SELECT * FROM produtos')
+        banco_produtos = cursor.fetchall()
+
+        search_produtos.clear()
+
+        for produto in banco_produtos:
+            if produto[0] not in search_produtos:
+                search_produtos.apped(produto[0])
