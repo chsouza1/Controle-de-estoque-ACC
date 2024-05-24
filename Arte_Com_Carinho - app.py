@@ -835,7 +835,7 @@ class FrmAdmin(QMainWindow):
         self.completer.setCaseSensitivity(Qt.CaseInsensitive)
         self.ui.line_search_bar_monitoramento.setCompleter(self.completer)
 
-    def AtualizaCompleterSeatchProdutos(self):
+    def AtualizaCompleterSearchProdutos(self):
         global search_produtos
 
         cursor.execute('SELECT * FROM produtos')
@@ -846,3 +846,105 @@ class FrmAdmin(QMainWindow):
         for produto in banco_produtos:
             if produto[0] not in search_produtos:
                 search_produtos.apped(produto[0])
+
+        self.ui.line_search_Bar_produtos.setCompleter(self.completer)
+        self.ui.line_search_Bar_alterar_produto.setCompleter(self.completer)
+        self.ui.line_search_Bar_cadastrar_produto.setCompleter(self.completer)
+        self.ui.line_search_bar_vendas.setCompleter(self.completer)
+
+
+    def AtualizaCompleterSearchFuncionarios(self):
+        global search_funcionarios
+
+        cursor.execute('SELECT * FROM login')
+        banco_funcionarios = cursor.fetchall()
+
+        search_funcionarios.clear()
+
+        for funcionario in banco_funcionarios:
+            search_funcionarios.append(funcionario[0])
+        
+        self.completer = QCompleter(search_colaboradores)
+        self.completer.setCaseSensitivity(Qt.CaseInsensitive)
+
+        self.ui.line_search_bar_buscar_funcionarios.setCompleter(self.completer)
+        self.ui.line_search_bar_colaboradores.setCompleter(self.completer)
+
+
+    def AtualizaCompleterSearchClientes(self):
+        global search_clientes
+
+        cursor.execute('SELECT * FROM clientes')
+        banco_clientes = cursor.fetchall()
+
+        search_clientes.clear()
+
+        for clientes in banco_clientes:
+            search_clientes.append(clientes[0])
+        self.completer.setCaseSensitivity(Qt.CaseInsensitive)
+
+        self.ui.line_search_Bar_clientes.setCompleter(self.completer)
+        self.ui.line_search_Bar_alterar_clientes.setCompleter(self.completer)
+        self.ui.line_search_Bar_cadastrar_clientes.setCompleter(self.completer)
+        self.ui.line_cliente.setCompleter(self.completer)
+
+
+    def CadastroFuncionarios(self):
+
+        login = self.ui.line_login
+        senha = self.ui.line_senha
+        nome = self.ui.line_nome
+        nivel = ''
+
+        radio_admin = self.ui.radio_admin
+        radio_funcionario = self.ui.radio_funcionario
+
+        if radio_funcionario.isChecked() == False and radio_admin.isChecked() == False:
+            self.Popup()
+        else:
+            if login.text() != '' and senha.text() != '' and nome.text() != '':
+                if radio_admin.isChecked() == True:
+                    nivel = 'admin'
+
+                if radio_funcionario.isChecked() == True:
+                    nivel = 'Funcionario'
+
+                cursor.execute('SELECT * FROM login')
+                banco_login = cursor.fetchall()
+
+                loginNoBanco = False
+
+                for loginBanco in banco_login:
+                    if loginBanco[0] == login.text():
+                        loginNoBanco = True
+                        break
+
+
+                if loginNoBanco == False:
+                    comando_SQL = 'INSERT INTO login VALUES (%s,%s,%s,%s)'
+                    dados = f'{login.text()}', f'{senha.text()}', f'{nivel}', f'{nome.text()}'
+                    cursor.execute(comando_SQL,dados)
+                    banco.commit()
+
+                    login.clear()
+                    senha.clear()
+                    nome.clear()
+
+                    self.ui.line_login.setStyleSheet(StyleNormal)
+
+                elif loginNoBanco == True:
+                    self.ui.line_login.setStyleSheet(StyleError)
+
+            self.AtualizaTabelasLogin()
+            self.AtualizaCompleterSearchFuncionarios()
+
+
+    def CadastrarClientes(self):
+
+        cpf = self.ui.line_cpf_cadastrar_clientes
+        nome = self.ui.line_nome_cadastrar_clientes
+        endereco = self.ui.line_endereco_cadastrar_clientes
+        contato = self.ui.line_contato_cadastrar_clietes
+
+        if cpf.text() != '' and nome.text() != '' and endereco.text() != '' and contato.text() != '':
+            comando_SQL = 'INSERT INTO clientes (CPF, Nome, Endereco, Contato) VALUES (%s,%s,%s,%s)'
