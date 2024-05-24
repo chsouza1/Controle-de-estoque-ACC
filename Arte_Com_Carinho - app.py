@@ -948,3 +948,436 @@ class FrmAdmin(QMainWindow):
 
         if cpf.text() != '' and nome.text() != '' and endereco.text() != '' and contato.text() != '':
             comando_SQL = 'INSERT INTO clientes (CPF, Nome, Endereco, Contato) VALUES (%s,%s,%s,%s)'
+            dados = f'{cpf.text()}', f'{nome.text()}', f'{endereco.text()}', f'{contato.text()}'
+            cursor.execute(comando_SQL, dados)
+
+            self.AtualizaTabelasClientes()
+            self.AtualizaCompleterSearchClientes()
+
+            cpf.clear()
+            nome.clear()
+            endereco.clear()
+            contato.clear()
+
+    def CadastrarFornecedores(self):
+        nome = self.ui.line_cadastrar_nome_fornecedores
+        endereco = self.ui.line_cadastrar_endereco_fornecedores
+        contato = self.ui.line_cadastrar_contato_fornecedores
+
+        cursor.execute('SELECT * FROM fornecedores')
+        banco_fornecedores = cursor.fetchall()
+
+        FornecedoresNoBanco = False
+
+        for fornecedor in banco_fornecedores:
+            if fornecedor[0] == nome.text():
+                FornecedoresNoBanco = True
+
+        if nome.text() != '' and endereco != '' and contato != '':
+            if FornecedoresNoBanco == False:
+                comando_SQL = 'INSERT INTO fornecedores VALUES (%s.%s.%s)'
+                dados = f'{nome.text()}', f'{endereco.text()}', f'{contato.text()}'
+                cursor.execute(comando_SQL, dados)
+
+                nome.clear()
+                endereco.clear()
+                contato.clear()
+
+                nome.setStyleSheet(StyleNormal)
+
+                self.AtualizaTabelasFornecedores()
+                self.AtualizaCompleterSearchFornecedores()
+
+            else:
+                nome.setStyleSheet(StyleError)
+
+    def CadastrarProdutos(self):
+        global search_fornecedores
+
+        cod_produto = self.ui.line_codigo_produto_cadastrar
+        descricao = self.ui.line_descricao_cadastrar
+        valor_unitario = self.ui.line_valor_cadastrar
+        qtde_estoque = self.ui.line_qtde_cadastrar
+        fornecedor = self.ui.line_fornecedor_cadastrar
+
+        cursor.execute("SELECT * FROM produtos")
+        banco_produtos = cursor.fetchall()
+
+        ProdutoJaCadastrado = False
+        FornecedoresNoSearch = False
+
+        if cod_produto.text() != '' and descricao.text() != '' and valor_unitario.text() != '' and qtde_estoque.text() != '' and fornecedor.text() != '':
+            for produto in banco_produtos:
+                if produto[0] == cod_produto.text():
+                    cod_produto.setStyleSheet(StyleError)
+
+                    ProdutoJaCadastrado = True
+
+                else:
+                    cod_produto.setStyleSheet(StyleNormal)
+
+                if fornecedor.text() in search_fornecedores:
+                    FornecedoresNoSearch = True
+
+                    fornecedor.setStyleSheet(StyleNormal)
+                else:
+                    fornecedor.setStyleSheet(StyleError)
+
+                if ProdutoJaCadastrado == False and FornecedoresNoSearch == True:
+                    comando_SQL = 'INSERT INTO produtos VALUES (%s,%s,%s,%s,%s)'
+                    dados = f'{cod_produto.text()}', f'{descricao.text()}', f'{valor_unitario.text()}', f'{qtde_estoque.text()}', f'{fornecedor.text()}'
+                    cursor.execute(comando_SQL, dados)
+
+                    cod_produto.clear()
+                    descricao.clear()
+                    valor_unitario.clear()
+                    qtde_estoque.clear()
+                    fornecedor.clear()
+
+                    self.AtualizaTabelasProdutos()
+                    self.AtualizaCompleterSearchProdutos()
+
+    def CadastrandoVendas(self):
+
+        global search_produtos, StyleError, StyleNormal
+
+        cursor.execute("SELECT * FROM produtos")
+        banco_produtos = cursor.fetchall()
+
+        produtoInserido = self.ui.line_codigo_vendas
+        qtde = self.ui.line_quantidade_vendas
+        desconto = self.ui.line_desconto_vendas
+        nomeProduto = ''
+
+        ProdutoNoBanco = False
+        QuantidadeMenorQueEstoque = False
+        DescontoOK = False
+        ValorUnitario = 0
+
+        for pos, produto in enumerate(banco_produtos):
+
+            if produtoInserido.text() == produto[0]:
+                ProdutoNoBanco = True
+                produtoInserido.setStyleSheet(StyleNormal)
+                if qtde.text().isnumeric() == True:
+                    if int(produto[3]) >= int(qtde.text()) and int(qtde.text()) > 0:
+                        QuantidadeMenorQueEstoque = True
+                        qtde.setStyleSheet(StyleNormal)
+
+                        ValorUnitario = produto[2]
+                        NomeProduto = produto[1]
+                        TotalQtde = int(produto[3]) - int(qtde.text())
+                        cursor.execute(f"UPDATE produtos SET qtde_estoque = '{TotalQtde}' WHERE cod_produto = '{produto[0]}'")
+
+                    else:
+                        qtde.setStyleSheet(StyleError)
+                else:
+                    qtde.setStyleSheet(StyleError)
+
+                    break
+            else:
+                produtoInserido.setStyleSheet(StyleError)
+
+        if desconto.text().isnumeric():
+            DescontoOK = True
+
+        if ProdutoNoBanco == True and QuantidadeMenorQueEstoque == True and DescontoOK == True:
+            cursor.execute('SELECT MAX(id) FROM vendas')
+            ultimo_id = cursor.fetchone()
+
+            for id_antigo in ultimo_id:
+                if id_antigo == None:
+                    id = 0
+                else:
+                    od = int(id_antigo) + 1
+
+            valor = f'0.{desconto.text()}'
+            valorTotal = int(ValorUnitario) * int(qtde.text())
+            descontoTotal = int(valorTotal) * float(valor)
+            comando_SQL = 'INSERT INTO vendas VALUES (%s,%s,%s,%s,%s,%s)'
+            dados = f'{produtoInserido.text()}', f'{NomeProduto}', f'{ValorUnitario}', f'{qtde.text()}', f'{int(valorTotal) - int(descontoTotal)}', f'{id}'
+            cursor.execute(comando_SQL, dados)
+
+            self.AtualizaTotal()
+            self.AtualizaTabelasProdutos()
+            self.AtualizaTabelaVendas()
+    
+
+    def AlterarFuncionarios(self):
+        global id_tabela_alterar
+
+        login = self.ui.line_login_alterar_funcionarios
+        senha = self.ui.line_senha_alterar_funcionarios
+        nome = self.ui.line_nome_alterar_funcionarios
+
+        cursor.execute('SELECT * FROM login')
+        banco_login = cursor.fetchall()
+
+        if login.text() != '' and senha.text() != '' and nome.text() != '':
+
+            loginNoBanco = False
+
+            for pos, user in enumerate(banco_login):
+                if login.text() == user[0] and pos != id_tabela_alterar:
+                    loginNoBanco = True
+
+            for pos, user in enumerate(banco_login):
+                if pos == id_tabela_alterar:
+                    if loginNoBanco == False:
+                        cursor.execute(
+                            f'UPDATE login set usuario = "{login.text()}", senha = "{senha.text()}", nivel = "{user[2]}", nome = "{nome.text()}"'
+                            f'WHERE usuario = "{user[0]}"')
+                        banco.comit()
+
+                        login.clear()
+                        senha.clear()
+                        nome.clear()
+
+                        self.AtualizaTabelasLogin()
+                        self.AtualizaCompleterSearchFuncionarios()
+
+                        self.ui.line_login_alterar_funcionarios.setStyleSheet(StyleNormal)
+                        break
+                    else:
+                        self.ui.line_login_alterar_funcionarios.setStyleSheet(StyleError)
+
+    def AlterarClientes(self):
+        global id_alterar_Clientes
+
+        cpf = self.ui.line_alterar_cpf_cliente
+        nome = self.ui.line_alterar_nome_cliente
+        endereco = self.ui.line_alterar_endereco_cliente
+        contato = self.ui.line_alterar_contato_cliente
+
+        cursor.execute('SELECT * FROM clientes')
+        banco_clientes = cursor.fetchall()
+        if cpf.text() != '' and nome.text() != '' and endereco.text() != '' and contato.text() != '':
+            for pos, cliente in enumerate(banco_clientes):
+                if pos == id_alterar_Clientes:
+                    cursor.execute(
+                        f'UPDATE clientes set CPF = "{cpf.text()}", nome = "{nome.text()}", endereço = "{endereco.text()}", contato = "{contato.text()}"'
+                        f'WHERE CPF = "{cliente[0]}"')
+
+                    cpf.clear()
+                    nome.clear()
+                    endereco.clear()
+                    contato.clear()
+
+                    self.AtualizaTabelasClientes()
+                    self.AtualizaCompleterSearchClientes()
+
+                    break
+
+
+    def AlterarFornecedores(self):
+        global id_alterar_fornecedores
+
+        cursor.execute('SELECT * FROM fornecedores')
+        banco_fornecedores = cursor.fetchall()
+
+        nome = self.ui.line_alterar_nome_fornecedor
+        endereco = self.ui.line_alterar_endereco_fornecedor
+        contato = self.ui.line_alterar_contato_fornecedor
+
+        if nome.text() != '' and endereco.text() != '' and contato.text() != '':
+            for pos, fornecedores in enumerate(banco_fornecedores):
+                if pos == id_alterar_fornecedores:
+                    cursor.execute(
+                        f'UPDATE clientes set nome = "{nome.text()}", endereço = "{endereco.text()}", cadastro = "{contato.text()}"'
+                        f'WHERE CPF = "{fornecedores[0]}"')
+
+                    nome.clear()
+                    endereco.clear()
+                    contato.clear()
+
+                    self.AtualizaTabelasFornecedores()
+                    self.AtualizaCompleterSearchFornecedores()
+                    break
+
+
+    def AlterarProdutos(self):
+        global id_alterar_produtos
+        global search_fornecedores
+
+        cursor.execute('SELECT * FROM produtos')
+        banco_produtos = cursor.fetchall()
+
+        cod_produto = self.ui.line_codigo_alterar_produto
+        descricao = self.ui.line_descricao_alterar_produto
+        valor_unitario = self.ui.line_valor_alterar_produto
+        qtde_estoque = self.ui.line_qtde_alterar_produto
+        fornecedor = self.ui.line_fornecedor_alterar_produto
+
+        FornecedorNoSearch = False
+        ProdutoJaCadastrado = False
+        AlterarProduto = ''
+
+        if cod_produto.text() != '' and descricao.text() != '' and valor_unitario.text() != '' and qtde_estoque.text() != '' and fornecedor != '':
+            if fornecedor.text() in search_fornecedores:
+                FornecedorNoSearch = True
+
+                fornecedor.setStyleSheet(StyleNormal)
+
+            else:
+                fornecedor.setStyleSheet(StyleError)
+
+            for pos, produto in enumerate(banco_produtos):
+                if cod_produto() == produto[0] and pos != id_alterar_produtos:
+                    ProdutoJaCadastrado = True
+
+                    cod_produto.setStyleSheet(StyleNormal)
+                else:
+                    cod_produto.setStyleSheet(StyleError)
+
+                if pos == id_alterar_produtos:
+                    AlterarProduto = produto[0]
+
+        if FornecedorNoSearch == True and ProdutoJaCadastrado == False:
+            cursor.execute(
+                f'UPDATE produtos set cód_produto = "{cod_produto.text()}", descrição = "{descricao.text()}", valor_unitário = "{valor_unitario.text()}", qtde_estoque = "{qtde_estoque.text()}", fornecedor = "{fornecedor.text()}"'
+                f'WHERE cód_produto = "{AlterarProduto}"')
+
+            cod_produto.clear()
+            descricao.clear()
+            valor_unitario.clear()
+            qtde_estoque.clear()
+            fornecedor.clear()
+
+            self.AtualizaTabelasProdutos()
+            self.AtualizaCompleterSearchProdutos()
+            self.AtualizaTabelaVendas()
+
+    def ExcluirFuncionarios(self):
+
+        id = self.ui.tabela_funcionarios.currentRow()
+
+        cursor.execute('SELECT * FROM login')
+        banco_login = cursor.fetchall()
+
+        deleter_user = ''
+
+        for pos, user in enumerate(banco_login):
+            if id == pos:
+                deleter_user = user[0]
+
+        cursor.execute(f'DELETE FROM login WHERE usuario = "{deleter_user}"')
+        banco.commit()
+        
+        self.AtualizarTabelasLogin()
+        self.AtualizaCompleterSearchFuncionarios()
+    
+    def ExcluirClientes(self):
+        id = self.ui.tabela_clientes.currentRow()
+        cursor.execute('SELECT * FROM clientes')
+        banco_clientes = cursor.fetchall()
+
+        deletar_cliente = ''
+
+        for pos, cliente in enumerate(banco_clientes):
+            if id == pos:
+                deletar_cliente = cliente[0]
+
+        cursor.execute(f'DELETE FROM clientes WHERE CPF "{deletar_cliente}"')
+        banco_commit()
+
+        self.AtualizaTabelasClientes()
+        self.AtualizaCompleterSearchClientes()
+
+
+    def ExcluirFornecedores(self):
+
+        id = self.ui.tabela_fornecedores.currentRow()
+
+        cursor.execute('SELECT * FROM fornecedores')
+        banco_fornecedor = cursor.fetchall()
+
+        deletar_fornecedor = ''
+
+        for pos, fornecedor in enumerate(banco_fornecedor):
+            if id == pos:
+                deletar_fornecedor = fornecedor[0]
+
+        cursor.execute(f'DELETE FROM fornecedores WHERE None = "{deletar_fornecedor}"')
+        banco.commit()
+
+        self.AtualizarTabelasFornecedores()
+        self.AtualizaCompleterSearchFornecedores()
+    
+    def ExcluirProdutos(self):
+
+        id = self.ui.tabela_produtos.currentRow()
+        cursor.execute('SELECT * FROM produtos')
+        banco_produtos = cursor.fetchall()
+
+        deletar_produto = ''
+
+        for pos, produto in enumerate(banco_produtos):
+            if id == pos:
+                deletar_produto = produto[0]
+
+        cursor.execute(f'DELETE FROM produtos WHERE cod_produtos = "{produto[0]}"')
+        banco.commit()
+
+        self.AtualizaTabelasProdutos()
+        self.AtualizaCompleterSearchProdutos()
+
+
+    def ExcluirVendas(self):
+        id = self.ui.tabela_vendas.currentRow()
+
+        if id != - 1:
+            cursor.execute('SELECT * FROM vendas ORDER BY id ASC')
+            banco_vendas = cursor.fetchall()
+            cursor.execute('SELECT * FROM produtos')
+            banco_produtos = cursor.fetchall()
+
+            id_deletado = 0
+
+            for venda in banco_vendas:
+                if venda[5] == id:
+                    id_deletado = venda[5]
+
+                    for produto in banco_produtos:
+                        if venda[0] == produto[0]:
+                            TotalEstoque = int(venda[3]) + int(produto[3])
+                            cursor.execute(f'UPDATE produtos SET qtde_estoque = "{TotalEstoque}" WHERE cod_produto "{produto[0]}"')
+                            break
+
+                    cursor.execute(f'DELETE FROM vendas WHERE id = {id}')
+                    banco.commit()
+                    break
+                
+                self.AtualizaTabelaVendas()
+                self.AtualizaTotal()
+                self.AtualizaCompleterSearchProdutos()
+
+
+    def setTextAlterarFuncionarios(self):
+        global id_tabela_alterar
+
+        nome = self.ui.line_nome_alterar_funcionarios
+        login = self.ui.line_login_alterar_funcionarios
+        senha = self.ui.line_alterar_funcionarios
+
+        id_tabela_alterar = self.ui.tabela_alterar_funcionarios.currentRow()
+
+        cursor.execute('SELECT * FROM login')
+        banco_login = cursor.fetchall()
+
+        for pos, user in enumerate(banco_login):
+            if pos == id_tabela_alterar:
+                nome.setText(user[3])
+                login.setText(user[0])
+                senha.setText(user[1])
+
+    def setTextAlterarClientes(self):
+        global id_alterar_Clientes
+
+        cpf = self.ui.line_alterar_cpf_cliente
+        nome = self.ui.line_alterar_nome_cliente
+        endereco = self.ui.line_alterar_endereco_cliente
+        contato = self.ui.line_alterar_contato_cliente
+
+        
+
+
