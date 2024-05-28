@@ -1905,10 +1905,76 @@ class FrmFuncionario(QMainWindow):
         TamanhoDoTexto = len(CPF.text())
 
         if TamanhoDoTexto == 3 and TextoInserido.isnumeric() == True:
-            CPF.setText(f'{TextoInserido}')
+            CPF.setText(f'{TextoInserido}.')
         if TamanhoDoTexto == 7 and TextoInserido[4:].isnumeric() == True:
+            CPF.setText(f'{TextoInserido}.')
+        if TamanhoDoTexto == 11 and TextoInserido[8:].isnumeric() == True:
+            CPF.setText(f'{TextoInserido}-')
 
+    def FinalizarVendas(self):
+        cursor.execute('SELECT * FROM vendas')
+        banco_vendas = cursor.fetchall()
 
+        cursor.execute('SELECT * FROM quem_vendeu_mais')
+        banco_quem_mais_vendeu = cursor.fetchall()
 
+        if len(banco_vendas) > 0:
+            tempoAtual = Qtime.currentTime()
+            tempoTexto = tempoAtual.toString('hh:mm:ss')
+            data_atual = datetime.date.today()
+            dataTexto = data_atual.strftime('%d/%m/%Y')
 
-        
+            qtde_vendido = list()
+            totalVenda = list()
+            vendedor = UserLogado
+            clienteInserido = self.ui.line_cliente
+            cliente = ''
+            data_hora = f'{dataTexto} / {tempoTexto}'
+
+        if clienteInserido.text() in search_clientes:
+            cliente = clienteInserido.text()
+        else:
+            cliente = 'Não Informado'
+
+        for venda in banco_vendas:
+            qtde_vendido.append(int(venda[3]))
+            totalVenda.append(int(venda[4]))
+
+        comando_SQL = 'INSERT INTO monitoramento_vendas VALUES (%s,%s,%s,%s,%s)'
+        dados = f'{vendedor}', f'{cliente}', f'{sum(qtde_vendido)}', f'{sum(totalVenda)}', f'{data_hora}'
+        cursor.execute(comando_SQL, dados)
+
+        colaboradores = list()
+        for colaborador in banco_quem_mais_vendeu:
+            colaboradores.append(colaborador[0])
+
+            if colaborador[0] == vendedor:
+                cursor.execute(f'UPDATE quem_vendeu_mais set total_qtde = {int(colaborador[1]) + int(sum(qtde_vendido))} WHERE nome = "{vendedor}"')
+
+        if vendedor not in colaboradores:
+            comando_SQL = 'INSERT INTO quem_vendeu_mais VALUES (%s,%s)'
+            dados = f'{vendedor}', f'{sum(qtde_vendido)}'
+            cursor.execute(comando_SQL, dados)
+
+        cursor.execute('DELETE FROM vendas')
+        self.AtualizaTabelaVendas()
+        self.AtualizaTotal()
+        self.AtualizaTabelaMonitoramentoVendas()
+        self.AtualizaCompleterSearchVendas()
+
+        self.ui.line_codigo_vendas.clear()
+        self.ui.line_cliente.clear()
+        self.ui.line_quantidade_vendas.clear()
+        self.ui.line_desconto_vendas.clear()
+        self.ui.lbl_troco.setText('0,00')
+        self.ui.line_cliente.setStyleSheet(StyleNormal)
+        self.ui.line_search_bar_vendas.clear()
+        self.ui.line_troco.clear()
+        self.ui.line_desconto_vendas.setStyleSheet(StyleNormal)
+        self.ui.line_codigo_vendas.setStyleSheet(StyleNormal)
+        self.ui.line_quantidade_vendas.setStyleSheet(StyleNormal)
+
+    def setTextAlterarProdutos(self):
+        global id_alterar_produtos
+
+        cod_produto = self.ui.line_codigo          
