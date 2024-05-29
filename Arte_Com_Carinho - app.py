@@ -1977,4 +1977,296 @@ class FrmFuncionario(QMainWindow):
     def setTextAlterarProdutos(self):
         global id_alterar_produtos
 
-        cod_produto = self.ui.line_codigo          
+        cod_produto = self.ui.line_codigo_alterar_produto
+        descricao = self.ui.line_descricao_alterar_produto
+        valor_unitario = self.ui.line_valor_alterar_produto
+        qtde_estoque = self.ui.line_qtde_alterar_produto
+        fornecedor = self.ui.line_fornecedor_alterar_produto
+
+        id_alterar_produtos = self.ui.tabela_alterar_produto.currentRow()
+
+        cursor.execute('SELECT * FROM produtos')
+        banco_produtos = cursor.fetchall()
+
+        for pos, produto in enumerate(banco_produtos):
+            if pos == id_alterar_produtos:
+                cod_produto.setText(produto[0])
+                descricao.setText(produto[1])
+                valor_unitario.setText(produto[2])
+                qtde_estoque.setText(produto[3])
+                fornecedor.setText(produto[4])
+    
+    def SearchProdutos(self, pg):
+        tabela = self
+        produto = self
+
+        if pg == 'Produtos':
+            tabela = self.ui.tabela_produto
+            produto = self.ui.line_search_bar_produtos
+        if pg == 'Alterar':
+            tabela = self.ui.tabella_busca_produto
+            produto = self.ui.line_search_Bar_alterar_produto
+        if pg == 'Cadastrar':
+            tabela = self.ui.tabella_cadastro
+            produto = self.ui.line_search_Bar_cadastrar_produto
+
+        items = tabela.finItems(produto.text(), Qt.MatchContains)
+
+        if items:
+            item = items[0]
+            tabela.setCurrentItem(item)
+
+    def CadastrarProdutos(self):
+
+        global search_fornecedores
+
+        cod_produto = self.ui.line_codigo_alterar_produto
+        descricao = self.ui.line_descricao_alterar_produto
+        valor_unitario = self.ui.line_valor_alterar_produto
+        qtde_estoque = self.ui.line_qtde_alterar_produto
+        fornecedor = self.ui.line_fornecedor_alterar_produto
+
+        cursor.execute("SELECT * FROM produtos")
+        banco_produtos = cursor.fetchall()
+
+        ProdutoJaCadastrado = False
+        FornecedorNoSearch = False
+
+        if cod_produto.text() != '' and descricao.text() != '' and valor_unitario.text() != '' and qtde_estoque.text() != '' and fornecedor.text() != '':
+            for produto in banco_produtos:
+                if produto[0] == cod_produto.text():
+                    cod_produto.setStyleSheet('''
+                                background-color: rgba(0, 0 , 0, 0);
+                                border: 2px solid rgba(0,0,0,0);
+                                border-bottom-color: rgb(255, 17, 49);;
+                                color: rgb(0,0,0);
+                                padding-bottom: 8px;
+                                border-radius: 0px;
+                                font: 10pt "Montserrat";''')
+                    
+                    ProdutoJaCadastrado = True
+
+            else:
+                cod_produto.setStyleSheet('''
+                                    background-color: rgba(255, 255, 255, 0);
+                                    border: 2px solid rgba(0,0,0,0);
+                                    border-bottom-color:rgb(159, 63, 250);
+                                    color: rgb(0,0,0);
+                                    padding-bottom: 8px;
+                                    border-radius: 0px;
+                                    font: 10pt "Montserrat";''')
+            
+            if fornecedor.text() in search_fornecedores:
+                FornecedorNoSearch = True
+                fornecedor.setStyleSheet('''
+                                            background-color: rgba(0, 0 , 0, 0);
+                                            border: 2px solid rgba(0,0,0,0);
+                                            border-bottom-color: rgb(159, 63, 250);
+                                            color: rgb(0,0,0);
+                                            padding-bottom: 8px;
+                                            border-radius: 0px;
+                                            font: 10pt "Montserrat";''')
+            else:
+                fornecedor.setStyleSheet('''
+                            background-color: rgba(0, 0 , 0, 0);
+                            border: 2px solid rgba(0,0,0,0);
+                            border-bottom-color: rgb(255, 17, 49);;
+                            color: rgb(0,0,0);
+                            padding-bottom: 8px;
+                            border-radius: 0px;
+                            font: 10pt "Montserrat";''')
+                
+        if ProdutoJaCadastrado == False and FornecedorNoSearch == True:
+            comando_SQL = 'INSERT INTO produtos VALUES (%s,%s,%s,%s,%s)'
+            dados = f'{cod_produto.text()}', f'{descricao.text()}', f'{valor_unitario.text()}', f'{qtde_estoque.text()}', f'{fornecedor.text()}'
+            cursor.execute(comando_SQL, dados)
+
+            cod_produto.clear()
+            descricao.clear()
+            valor_unitario.clear()
+            qtde_estoque.clear()
+            fornecedor.clear()
+
+            self.AtualizaTabelasProdutos()
+            self.AtualizaCompleterSearchProdutos()
+
+
+    def CadastrandoVendas(self):
+
+        global search_produtos, StyleError, StyleNormal
+
+        cursor.execute("SELECT * FROM produtos")
+        banco_produtos = cursor.fetchall()
+
+        produtoInserido = self.ui.line_codigo_vendas
+        qtde = self.ui.line_quantidade_vendas
+        desconto = self.ui.line_desconto_vendas
+        NomeProduto = ''
+
+        ProdutoNoBanco = False
+        QuantidadeMenorQueEstoque = False
+        DescontoOk = False
+        ValorUnitario = 0
+
+        for pos, produto in enumerate(banco_produtos):
+            if produtoInserido.text().upper() == str(produto[0]):
+                ProdutoNoBanco = True
+                produtoInserido.setStyleSheet(StyleNormal)
+                if qtde.text().isnumeric() == True:
+                    if int(produto[3]) >= int(qtde.text()) and int(qtde.text()) > 0:
+                        QuantidadeMenorQueEstoque = True
+                        qtde.setStyleSheet(StyleNormal)
+
+                        ValorUnitario = produto[2]
+                        NomeProduto = produto[1] + " - R$" + str(round(ValorUnitario, 2))
+                        TotalQtde = int(produto[3]) - int(qtde.text())
+                        cursor.execute(f"UPDATE produtos SET qtde_estoque = '{TotalQtde}' WHERE cod_produto = '{produto[0]}'")
+
+                    else:
+                        qtde.setStyleSheet(StyleError)
+                else:
+                    qtde.setStyleSheet(StyleError)
+                    break
+            else:
+                produtoInserido.setStyleSheet(StyleError)
+
+            if desconto.text().isnumeric():
+                DescontoOk = True
+
+            if ProdutoNoBanco == True and QuantidadeMenorQueEstoque == True and DescontoOk == True:
+                cursor.execute('SELECT MAX(id) FROM vendas')
+                ultimo_id = cursor.fetchone()
+
+                for id_antigo in ultimo_id:
+                    if id_antigo == None:
+                        id = 0
+                    else:
+                        id = int(id_antigo) + 1
+
+                valor = f'0.{desconto.text()}'
+                valorTotal = int(ValorUnitario) * int(qtde.text())
+                descontoTotal = int(valorTotal) * float(valor)
+                comando_SQL = 'INSERT INTO vendas VALUES (%s,%s,%s,%s,%s,%s)'
+                dados = f'{produtoInserido.text()}', f'{NomeProduto}', f'{valorTotal.text()}', f'{qtde.text()}', f'{int(valorTotal) - int(descontoTotal)}', f'{id}'
+                cursor.execute(comando_SQL, dados)
+
+                self.AtualizaTotal()
+                self.AtualizaTabelasProdutos()
+                self.AtualizaTabelaVendas()
+
+
+    def AlterarProdutos(self):
+        global id_alterar_produtos
+        global search_fornecedores
+
+        cursor.execute('SELECT * FROM produtos')
+        banco_produtos = cursor.fetchall()
+
+        cod_produto = self.ui.line_codigo_alterar_produto
+        descricao = self.ui.line_decricao_alterar_produto
+        valor_unitario = self.ui.line_valor_alterar_produto
+        qtde_estoque = self.ui.line_qtde_alterar_produto
+        fornecedor = self.ui.line_fornecedor_alterar_produto
+
+        FornecedorNoSearch = False
+        ProdutoJaCadastrado = False
+        AlterarProduto = ''
+
+        if cod_produto.text() != '' and descricao.text() != '' and valor_unitario.text() != '' and qtde_estoque != '' and fornecedor != '':
+            if fornecedor.text() in search_fornecedores:
+                FornecedorNoSearch = True
+
+                fornecedor.setStyleSheet('''
+                                        background-color: rgba(0, 0 , 0, 0);
+                                        border: 2px solid rgba(0,0,0,0);
+                                        border-bottom-color: rgb(159, 63, 250);
+                                        color: rgb(0,0,0);
+                                        padding-bottom: 8px;
+                                        border-radius: 0px;
+                                        font: 10pt "Montserrat";''')
+        else:
+                fornecedor.setStyleSheet('''
+                                        background-color: rgba(0, 0 , 0, 0);
+                                        border: 2px solid rgba(0,0,0,0);
+                                        border-bottom-color: rgb(255, 17, 49);;
+                                        color: rgb(0,0,0);
+                                        padding-bottom: 8px;
+                                        border-radius: 0px;
+                                        font: 10pt "Montserrat";''')
+        
+        for pos, produto in enumerate(banco_produtos):
+            if cod_produto.text() == produto[0] and pos != id_alterar_produtos:
+                ProdutoJaCadastrado = True
+                cod_produto.setStyleSheet('''
+                            background-color: rgba(0, 0 , 0, 0);
+                            border: 2px solid rgba(0,0,0,0);
+                            border-bottom-color: rgb(255, 17, 49);;
+                            color: rgb(0,0,0);
+                            padding-bottom: 8px;
+                            border-radius: 0px;
+                            font: 10pt "Montserrat";''')
+
+            else:
+                cod_produto.setStyleSheet('''
+                                   background-color: rgba(0, 0 , 0, 0);
+                                   border: 2px solid rgba(0,0,0,0);
+                                   border-bottom-color: rgb(159, 63, 250);
+                                   color: rgb(0,0,0);
+                                   padding-bottom: 8px;
+                                   border-radius: 0px;
+                                   font: 10pt "Montserrat";''')
+                
+            if pos == id_alterar_produtos:
+                AlterarProduto = produto[0]
+        
+        if FornecedorNoSearch == True and ProdutoJaCadastrado == False:
+            cursor.execute(
+                f'UPDATE produtos set cód_produto = "{cod_produto.text()}", descrição = "{descricao.text()}", valor_unitário = "{valor_unitario.text()}", qtde_estoque = "{qtde_estoque.text()}", fornecedor = "{fornecedor.text()}"'
+                f'WHERE cód_produto = "{AlterarProduto}"')
+        
+        cod_produto.clear()
+        descricao.clear()
+        valor_unitario.clear()
+        qtde_estoque.clear()
+        fornecedor.clear()
+
+        self.AtualizaTabelasProdutos()
+        self.AtualizaCompleterSearchProdutos()
+        self.AtualizaTabelaVendas()
+
+
+    def AtualizaCompleterSearchProdutos(self):
+        global search_produtos
+
+        cursor.execute('SELECT * FROM produtos')
+        banco_produtos = cursor.fetchall()
+
+        search_produtos.clear()
+
+        for produto in banco_produtos:
+            search_produtos.append(produto[1])
+
+        self.completer = QCompleter(search_produtos)
+        self.completer.setCaseSensitivy(Qt.CaseInsensitive)
+
+        self.ui.line_search_Bar_produtos.setCompleter(self.completer)
+        self.ui.line_search_Bar_alterar_produto.setCompleter(self.completer)
+        self.ui.line_search_Bar_cadastrar_produto.setCompleter(self.completer)
+        self.ui.line_search_bar_vendas.setCompleter(self.completer)
+    
+    def AtualizaCompleterSearchVendas(self):
+        global search_monitoramento
+
+        cursor.execute('SELECT * FROM monitoramento_vendas')
+        banco_monitoramento = cursor.fetchall()
+
+        search_monitoramento.clear()
+
+        for venda in banco_monitoramento:
+            if venda[0] not in search_monitoramento:
+                search_monitoramento.append(venda[0])
+
+            if venda[1] not in search_monitoramento:
+                if venda[1] != 'NAO INFORMADO':
+                    search_monitoramento.append(venda[1])
+            sea
