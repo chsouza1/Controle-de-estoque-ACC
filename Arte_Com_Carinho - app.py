@@ -2269,4 +2269,242 @@ class FrmFuncionario(QMainWindow):
             if venda[1] not in search_monitoramento:
                 if venda[1] != 'NAO INFORMADO':
                     search_monitoramento.append(venda[1])
-            sea
+        self.completer = QCompleter(search_monitoramento)
+        self.completer.setCaseSensitivity(Qt.CaseInsensitive)
+
+        self.ui.line_search_bar_monitoramento.setCompleter(self.completer)
+
+
+    def AtualizaCompleterSearchClientes(self):
+        global search_clientes
+
+        cursor.execute('SELECT * FROM clientes')
+        banco_cliente = cursor.fetchall()
+
+        search_clientes.clear()
+
+        for clientes in banco_cliente:
+            search_clientes.append(clientes[0])
+            search_clientes.append(clientes[1])
+
+        self.completer = QCompleter(search_clientes)
+        self.completer.setCaseSensitivity(Qt.CaseInsensitive)
+        self.ui.line_search_bar_clientes.setCompleter(self.completer)
+        self.ui.line_search_bar_alterar_cliente.setCompleter(self.completer)
+        self.ui.line_search_bar_cadastrar_cliente.setCompleter(self.completer)
+        self.ui.line_cliente.setCompleter(self.completer)
+
+    
+    def AtualizaTabelaVendas(self):
+        cursor.execute('SELECT * FROM vendas ORDER BY id ASC')
+        banco_vendas = cursor.fetchall()
+
+        row = 0
+
+        self.ui.tabela_vendas.setRowCount(len(banco_vendas))
+        self.ui.tabela_vendas.clear()
+
+        colunas = ['ITEM', 'COD', 'PRODUTO', 'VALOR UNITÁRIO', 'QTDE', 'TOTAL']
+        self.ui.tabela_vendas.setHorizontalHeaderLabels(colunas)
+
+        for venda in banco_vendas:
+
+            valor_unitario = lang.toString(int(venda[2]) * 0.01, 'f', 2)
+            total = lang.toString(int(venda[4]) * 0.01, 'f', 2)
+
+            self.ui.tabela_vendas.setItem(row, 0, QTableWidgetItem(str(venda[0])))
+            self.ui.tabela_vendas.setItem(row, 1, QTableWidgetItem(str(venda[1])))
+            self.ui.tabela_vendas.setItem(row, 2, QTableWidgetItem(str(venda[2])))
+            self.ui.tabela_vendas.setItem(row, 3, QTableWidgetItem(str(venda[3])))
+            self.ui.tabela_vendas.setItem(row, 4, QTableWidgetItem(str(venda[4])))
+            self.ui.tabela_vendas.setItem(row, 5, QTableWidgetItem(str(venda[5])))
+            row += 1
+
+    def AtualizaTabelaMonitoramentoVendas(self):
+        cursor.execute('SELECT * FROM monitoramento_vendas')
+        banco_monitoramento = cursor.fetchall()
+
+        self.ui.tabela_monitoramento.cear()
+
+        row = 0
+
+        self.ui.tabela_monitoramento.setRowCount(len(banco_monitoramento))
+        
+        colunas = ['Vendedor', 'Cliente', 'Qtde Vendido', 'Total Venda', 'Data/horário']
+        self.ui.tabela_monitoramento.setHorizontalHeaderLabels(colunas)
+        
+        for monitoramento in banco_monitoramento:
+            total_venda = lang.toString(int(venda[3]) * 0.01, 'f', 2)
+
+            self.ui.tabela_monitoramento.setItem(row, 0, QTableWidgetItem(str(venda[0])))
+            self.ui.tabela_monitoramento.setItem(row, 1, QTableWidgetItem(str(venda[1])))
+            self.ui.tabela_monitoramento.setItem(row, 2, QTableWidgetItem(str(venda[2])))
+            self.ui.tabela_monitoramento.setItem(row, 3, QTableWidgetItem(str('R$' + total_venda)))
+            self.ui.tabela_monitoramento.setItem(row, 4, QTableWidgetItem(str(venda[4])))
+            row += 1
+
+    def AtualizaTabelasProdutos(self):
+        cursor.execute('SELECT * FROM produtos')
+        banco_produtos = cursor.fetchall()
+
+        self.ui.tabela_produto.clear()
+        self.ui.tabela_alterar_produtos.clear()
+        self.ui.tabela_cadastro.clear()
+
+        row = 0
+
+        self.ui.tabela_produtos.setRowCount(len(banco_produtos))
+        self.ui.tabela_alterar_produto.setRowCount(len(banco_produtos))
+        self.ui.tabela_cadastro.setRowCount(len(banco_produtos))
+
+        colunas = ['ITEM', 'COD', 'PRODUTO', 'VALOR UNITÁRIO', 'QTDE ESTOQUE', 'FORNECEDOR']
+        self.ui.tabela_produtos.setHorizontalHeaderLabels(colunas)
+        self.ui.tabela_alterar_produtos.setHorizontalHeaderLabels(colunas)
+        self.ui.tabela_cadastro.setHorizontalHeaderLabels(colunas)
+
+        for pos, produto in enumerate(banco_produtos):
+            valor_unitario = lang.toString(int(produto[2]) * 0.01, 'f', 2)
+
+            self.ui.tabela_produto.setItem(row, 0, QTableWidgetItem(str(pos + 1)))
+            self.ui.tabela_produto.setItem(row, 1, QTableWidgetItem(str(produto[0])))
+            self.ui.tabela_produto.setItem(row, 2, QTableWidgetItem(str(produto[1])))
+            self.ui.tabela_produto.setItem(row, 3, QTableWidgetItem(str('R$' + valor_unitario)))
+            self.ui.tabela_produto.setItem(row, 4, QTableWidgetItem(str(produto[3])))
+            self.ui.tabela_produto.setItem(row, 5, QTableWidgetItem(str(produto[4])))
+
+            
+            self.ui.tabela_alterar_produto.setItem(row, 0, QTableWidgetItem(str(pos + 1)))
+            self.ui.tabela_alterar_produto.setItem(row, 1, QTableWidgetItem(str(produto[0])))
+            self.ui.tabela_alterar_produto.setItem(row, 2, QTableWidgetItem(str(produto[1])))
+            self.ui.tabela_alterar_produto.setItem(row, 3, QTableWidgetItem(str('R$' + valor_unitario)))
+            self.ui.tabela_alterar_produto.setItem(row, 4, QTableWidgetItem(str(produto[3])))
+            self.ui.tabela_alterar_produto.setItem(row, 5, QTableWidgetItem(str(produto[4])))
+
+            
+            self.ui.tabela_cadastro.setItem(row, 0, QTableWidgetItem(str(pos + 1)))
+            self.ui.tabela_cadastro.setItem(row, 1, QTableWidgetItem(str(produto[0])))
+            self.ui.tabela_cadastro.setItem(row, 2, QTableWidgetItem(str(produto[1])))
+            self.ui.tabela_cadastro.setItem(row, 3, QTableWidgetItem(str('R$' + valor_unitario)))
+            self.ui.tabela_cadastro.setItem(row, 4, QTableWidgetItem(str(produto[3])))
+            self.ui.tabela_cadastro.setItem(row, 5, QTableWidgetItem(str(produto[4])))
+            row += 1
+
+
+    def AtualizaTotal(self):
+
+        cursor.execute('SELECT * FROM vendas')
+        banco_vendas = cursor.fetchall()
+
+        vendas = list()
+
+        for pos, vendas in enumerate(vendas):
+            vendas.append(int(vendas[4]))
+
+            for pos, venda in enumerate(banco_vendas):
+                vendas.append(int(venda[4]))
+
+            total = lang.toString(sum(vendas) * 0.01, 'f', 2)
+            self.ui.lbl_total_vendas.setText(f'{total}')
+            self.troco()
+
+    def ExcluirVendas(self):
+
+        id = self.ui.tabela_vendas.currentRow()
+
+        if id != - 1:
+            cursor.execute('SELECT * FROM vendas ORDER BY id ASC')
+            banco_vendas = cursor.fetchall()
+            cursor.execute('SELECT * FROM banco_produtos')
+            banco_produtos = cursor.fetchall()
+
+            id_deletado = 0
+
+            for venda in banco_vendas:
+                if venda[0] == id:
+                    id_deletado = venda[5]
+
+                    for produto in banco_produtos:
+                        if venda[0] == produto[0]:
+                            TotalEstoque = int(venda[3]) + int(produto[3])
+                            cursor.execute(f'UPDATE produtos SET qtde_estoque = "{TotalEstoque} WHERE cod_produto = "{produto[0]}"')
+                            break
+            
+            cursor.execute('SELECT * FROM vendas ORDER BY id ASC')
+            banco_vendas = cursor.fetchall()
+
+            for venda in banco_vendas:
+                if venda[5] > id_deletado:
+                    cursor.execute(f'UPDATE vendas SET id = "{venda[5] - 1}" WHERE id = "{venda[5]}"')
+                    banco.commit()
+
+        self.AtualizaTabelaVendas()
+        self.AtualizaTotal()
+        self.AtualizaTabelasProdutos()
+
+
+    def ExcluirProdutos(self):
+
+        id = self.ui.tabela_produto.currentRow()
+
+        cursor.execute('SELECT * FROM produtos')
+        banco_produtos = cursor.fetchall()
+
+        for pos, produto in enumerate(banco_produtos):
+            if pos == id:
+                cursor.execute(f'DELETE FROM produtos WHERE cod_produto = "{produto[0]}"')
+                banco.commit()
+
+                self.AtualizaTabelasProdutos()
+                self.AtualizaCompleterSearchProdutos()
+
+if __name__ == '__main__':
+
+    wb = load_workbook('Base xls.xlsx')
+
+    futuroTexto = ''
+
+    click_cadastro_funcionarios = 0
+    click_alterar_funcionarios = 0
+
+    id_tabela_alterar = None
+    id_alterar_Clientes = None
+    id_alterar_fornecedores = None
+    id_alterar_produtos = None
+
+    search_fornecedores = list()
+    search_clientes = list()
+    search_produtos = list()
+    search_funcionarios = list()
+    search_vendas = list()
+    search_monitoramento = list()
+
+
+    vendas = list()
+
+    loc = QLocale.system().name()
+    lang = QLocale(loc)
+
+    UserLogado = None
+
+    StyleError = '''
+               background-color: rgba(0, 0 , 0, 0);
+               border: 2px solid rgba(0,0,0,0);
+               border-bottom-color: rgb(255, 17, 49);;
+               color: rgb(0,0,0);
+               padding-bottom: 8px;
+               border-radius: 0px;
+               font: 10pt "Montserrat";'''
+    
+    StyleNormal = '''
+                    background-color: rgba(0, 0 , 0, 0);
+                    border: 2px solid rgba(0,0,0,0);
+                    border-bottom-color: rgb(159,63,250);;
+                    color: rgb(0,0,0);
+                    padding-bottom: 8px;
+                    border-radius: 0px;
+                    font: 10pt "Montserrat";'''
+    
+    app = QApplication(sys.argv)
+    window = FrmLogin()
+    window.show()
+    sys.exit(app.exec_())
